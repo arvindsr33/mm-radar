@@ -1,0 +1,8 @@
+setuptools
+numpy
+pandas
+scipy
+matplotlib
+pyserial
+scikit_learn
+opencv-python
