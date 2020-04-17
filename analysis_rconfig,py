@@ -1,0 +1,20 @@
+Issues and questions:
+    - Debug 0FFE but data capture doesn't work
+    - why is debug prompted at all? 
+    - why is radar programming getting failed 
+
+Findings:
+    - Duty cycle is not a hard constraint (Chetan YB, TIe2e)
+    - its num_loops, so max is 255 
+    - Some specifications of JSON file (packetDelay_us, bytesToCapture, durationToCapture_ms, framesToCapture) with values (10, 1025, 1000, 5) could be violating radar specifications
+        >> make it compatible
+    - with 32KB buffer in 1843, max num_chirps should be 2048
+    - Max complex ADC sample rate is 12.5 Msps 
+    - suggested minimum idle times: (< 1GHz -> 2us), (1-2 GHz -> 3.5 us), (2-3 GHz -> 5 us), (>3 GHz, 7us)
+        + additional time needed if ADC sample rate below 5 Msps 
+
+Thoughts:
+    - if debug is not an error, then fixing potential json issues should make pipeline work 
+
+
+Assumptions:
