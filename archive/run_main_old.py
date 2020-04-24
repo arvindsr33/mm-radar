@@ -1,10 +1,8 @@
+from config_radar import CustomConfig
+from data_handling2 import DataHandling2
 import tkinter as tk
 from tkinter import filedialog
 import matplotlib.pyplot as plt 
-from config_radar import CustomConfig
-from processing_chain import ProcessingChain
-from data_handling import DataHandling 
-
 # What would you like to do? 
 
 objective = int(input('what would you like to do? \n 1 - configure radar \n 2 - organize new data \n 3 - range-doppler processing \n 4 - micro-doppler processing \n Enter here: '))
@@ -48,7 +46,7 @@ def organize_rawdata(num_samples, num_chirps, experiment_name):
     # (2) organize raw data 
 
     # (2.2) instantiate DataHandling class
-    data_handle = DataHandling(num_samples=num_samples, num_chirps=num_chirps, num_tx=num_tx, num_rx=num_rx, fps=fps)
+    data_handle = DataHandling2(num_samples=num_samples, num_chirps=num_chirps, num_tx=num_tx, num_rx=num_rx, fps=fps)
     # (2.3) organize data if new data is present
     data_directory = data_handle.organize_captured_data(experiment_name=experiment_name)
 
@@ -67,12 +65,13 @@ def perform_rangedoppler_processing():
     num_rx = int(params[3][4])
     fps = int(params[5][3:])
 
-    processing_chain = ProcessingChain(num_samples=num_samples, num_chirps=num_chirps, num_tx=num_tx, num_rx=num_rx, fps=fps)
-    processing_chain.range_doppler_process(data_directory)
+    data_handle = DataHandling2(num_samples=num_samples, num_chirps=num_chirps, num_tx=num_tx, num_rx=num_rx, fps=fps)
+    data_handle.range_doppler_process(data_directory)
     return
 
 def perform_microdoppler_processing():
-    data_directory =    filedialog.askdirectory(initialdir='/mnt/c/work/rcube_extract/dca_capture/captured_data')
+    #data_directory =    filedialog.askdirectory(initialdir='/mnt/c/work/rcube_extract/dca_capture/captured_data')
+    data_directory =    '/mnt/c/work/rcube_extract/dca_capture/captured_data/dca_apr19_2051_trx14_n122xp128_fps20_walk_no_gesture'  
     dir_name = data_directory.split("/")[-1]
     
     params = dir_name.split('_')
@@ -87,8 +86,8 @@ def perform_microdoppler_processing():
     # if use_defaults == False:
     #max_velocity = max_velocity if use_defaults else (3e8/77e9) / 4 * (2 *fps * num_chirps) # vmax = lambda / 4 / T
     #print('max_velocity: ' + str(max_velocity))
-    processing_chain = ProcessingChain(num_samples=num_samples, num_chirps=num_chirps, num_tx=num_tx, num_rx=num_rx, fps=fps)
-    processing_chain.micro_doppler_stft(data_directory, max_velocity)
+    data_handle = DataHandling2(num_samples=num_samples, num_chirps=num_chirps, num_tx=num_tx, num_rx=num_rx, fps=fps)
+    data_handle.micro_doppler_stft(data_directory, max_velocity)
 
     # plot 
     # plt.ion()
@@ -99,24 +98,20 @@ def perform_microdoppler_processing():
     #plt.show()
     return 
 
-
 def main():
 
     if isConfig:
         config_1843()
-
     if isNewData:
         organize_rawdata(num_samples, num_chirps, experiment_name)
 
     if isRangeDopplerProcess:
         perform_rangedoppler_processing()
-    
+
     if isMicroDopplerProcess:
         perform_microdoppler_processing()
-    
+
 
 if __name__ == "__main__":
     main()
-
-
 

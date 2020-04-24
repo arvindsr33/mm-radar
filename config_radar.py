@@ -6,9 +6,12 @@ class CustomConfig:
     read the default configuration file 
     take the radar specification inputs and modify the config values accordingly
 
+    Modifications:
+    v1.0.1: default config option enabled 
+
     """
 
-    def __init__(self, cli_loc='/dev/ttyS4', data_loc='/dev/ttyS3', num_tx=1, num_rx=4, res_range=0.05, max_range=8, max_velocity=2, fps=20, fs=3200, config_file='/home/arvind/code/mm-radar/profiles/profile_default.cfg'):
+    def __init__(self, cli_loc='/dev/ttyS4', data_loc='/dev/ttyS3', num_tx=1, num_rx=4, res_range=0.05, max_range=8, max_velocity=2, fps=20, fs=3200, use_defaults=False, config_file='profiles/profile_default.cfg'):
         # (0) instantiate the class parameters 
         self.cli_loc = cli_loc
         self.data_loc = data_loc
@@ -20,6 +23,7 @@ class CustomConfig:
         self.frames_per_second = fps
         self.dig_out_sample_rate = fs
         self.config_file = config_file
+        self.use_defaults = use_defaults
 
     def _run_config(self):
         """
@@ -46,38 +50,41 @@ class CustomConfig:
         # (1.3) assert errors if constraints violated 
         effective_duty_cycle = duty_cycle * idle_time / (idle_time + ramp_end_time)
         print('Effective duty cycle: ' + str(round(effective_duty_cycle*100)) + ' %')
-        assert effective_duty_cycle < 0.5, 'Effective duty cycle exceeds 50 %'
+        assert effective_duty_cycle <= 0.5, 'Effective duty cycle exceeds 50 %'
         assert freq_slope_const * ramp_end_time < 4e3, 'Invalid parameters... bandwidth exceeds 4 GHz! '
-        assert num_chirps < 255, 'Number of chirps per frame exceed 255... increase chirps period and/or frame rate'
+        assert num_chirps <= 255, 'Number of chirps per frame exceed 255... increase chirps period and/or frame rate'
         assert num_samples > 64 , 'Number of samples per chirp less than 64... '
-        assert num_samples < 32 * 1024 / 4 / self.num_rx, 'Number of samples per chirp exceed ADC buffer capacity...'
+        assert num_samples <= 32 * 1024 / 4 / self.num_rx, 'Number of samples per chirp exceed ADC buffer capacity...'
         assert freq_slope_const < 99.9, 'Chirp slope exceeds max limit of 100 MHz/us...'
-        assert self.dig_out_sample_rate < 12500, 'Sampling rate exceeds 1843 max limit...'
-        assert num_samples * num_chirps < 128 * 128, 'Radarcube size larger than limit...'
-        # (1.4) modify configuration file entries   
+        assert self.dig_out_sample_rate <= 12500, 'Sampling rate exceeds 1843 max limit...'
+        # assert num_samples * num_chirps <= 128 * 128, 'Radarcube size larger than limit...'
+
+        # (1.4) modify configuration file entries unless default config is requested
         config = [line.rstrip('\r\n') for line in open(self.config_file)]  
 
-        for index in range(len(config)):
+        if self.use_defaults == False: 
 
-            # Split the line
-            split_words = config[index].split(" ")
+            for index in range(len(config)):
 
-            # (1.4.1) modify profile configuration parameters
-            if "profileCfg" in split_words[0]:
-                # split_words[2] = str(start_freq)
-                split_words[3] = str(idle_time)
-                split_words[5] = str(ramp_end_time)
-                split_words[8] = str(freq_slope_const)
-                split_words[10] = str(num_samples)
-                split_words[11] = str(self.dig_out_sample_rate)
-                config[index] = " ".join(split_words)
-                
-            # (1.4.2) modify frame configuration parameters   
-            if "frameCfg" in split_words[0]:
-                split_words[3] = str(num_chirps)
-                # split_words[4] = str(num_frames)
-                split_words[5] = str(round(frame_periodicity,2))
-                config[index] = " ".join(split_words)
+                # Split the line
+                split_words = config[index].split(" ")
+
+                # (1.4.1) modify profile configuration parameters 
+                if "profileCfg" in split_words[0]:
+                    # split_words[2] = str(start_freq)
+                    split_words[3] = str(idle_time)
+                    split_words[5] = str(ramp_end_time)
+                    split_words[8] = str(freq_slope_const)
+                    split_words[10] = str(num_samples)
+                    split_words[11] = str(self.dig_out_sample_rate)
+                    config[index] = " ".join(split_words)
+                    
+                # (1.4.2) modify frame configuration parameters   
+                if "frameCfg" in split_words[0]:
+                    split_words[3] = str(num_chirps)
+                    # split_words[4] = str(num_frames)
+                    split_words[5] = str(round(frame_periodicity,2))
+                    config[index] = " ".join(split_words)
 
         # (1.5) print constraints
         print('\n')
