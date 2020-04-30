@@ -27,4 +27,6 @@ v1.0.0
     > raw_data_cube: Generator function that yeilds raw_data_cube iterator for each ADC raw data file. This function uses the raw_datatcube function in processing_chain.py script.
     > range_doppler_process: Compute range-doppler fft on raw data and save the output as a video. 
     > micro_doppler_stft: generates and saves short-time Fourier transform based micro-Doppler spectrogram image.
+   
+   + run_main.py: A script to run different actions: configuring radar, organizing data, range-doppler processing, micro-doppler processing
 
