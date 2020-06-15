@@ -1,0 +1,10 @@
+openradar
+setuptools
+numpy
+pandas
+scipy
+matplotlib
+pyserial
+scikit-learn
+opencv-python
+scikit-video

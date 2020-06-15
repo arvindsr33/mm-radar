@@ -1,0 +1,7 @@
+Findings:
+    - Duty cycle is not a hard constraint (Chetan YB, TIe2e)
+    - its num_loops, so max is 255 
+    - with 32KB buffer in 1843, max num_chirps should be 2048
+    - Max complex ADC sample rate is 12.5 Msps 
+    - suggested minimum idle times: (< 1GHz -> 2us), (1-2 GHz -> 3.5 us), (2-3 GHz -> 5 us), (>3 GHz, 7us)
+        + additional time needed if ADC sample rate below 5 Msps 
